@@ -26,9 +26,9 @@ public func configure(_ app: Application) async throws {
     
     // MARK: - Services
     app.views.use(.leaf)
-
+    app.repositories.use(.database)
     
-
-    // register routes
+    // MARK: - Application Setup
+    try migrations(app)
     try routes(app)
 }
