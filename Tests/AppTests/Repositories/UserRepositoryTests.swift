@@ -91,6 +91,7 @@ final class UserRepositoryTests: XCTestCase {
         let user = try await createAndSaveUser(app: app)
         var fetched = try await repository.find(id: user.id!)
         XCTAssertEqual(fetched?.isEmailVerified, false)
+        
         try await repository.set(\.$isEmailVerified, to: true, for: fetched!.id!)
         fetched = try await repository.find(id: user.id!)
         XCTAssertEqual(fetched?.isEmailVerified, true)

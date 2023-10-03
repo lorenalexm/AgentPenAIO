@@ -21,7 +21,8 @@ func createUser() -> User {
 }
 
 /// Helper function to create a `User` object already populated.
-/// Saves this `User` to the database and tests the Id is populated.
+/// Saves this `User` to the `Database` and tests the Id is populated.
+/// - Parameter app: The `Application` that contains our `Database` access.
 /// - Returns: The newly created `User` object.
 func createAndSaveUser(app: Application) async throws -> User {
     let user = createUser()
