@@ -27,6 +27,15 @@ extension Application {
             return storage(app)
         }
         
+        /// Verifies the `PropertyRepository` exists and returns it.
+        var listings: ListingRepository {
+            guard let storage = storage.makeListingRepository else {
+                fatalError("PropertyRepository not configured, use: app.listingRepository.use()")
+            }
+            
+            return storage(app)
+        }
+        
         /// Returns the `Storage` object, or creates one if it doesn't exist.
         var storage: Storage {
             if app.storage[Key.self] == nil {
@@ -44,6 +53,10 @@ extension Application {
         func use(_ make: @escaping (Application) -> (UserRepository)) {
             storage.makeUserRepository = make
         }
+        
+        func use(_ make: @escaping (Application) -> (ListingRepository)) {
+            storage.makeListingRepository = make
+        }
     }
 }
 
@@ -53,6 +66,7 @@ extension Application.Repositories {
         static var database: Self {
             .init {
                 $0.repositories.use { UserRepository(database: $0.db) }
+                $0.repositories.use { ListingRepository(database: $0.db) }
             }
         }
         let run: (Application) -> ()
@@ -69,6 +83,7 @@ extension Application.Repositories {
     class Storage {
         // MARK: - Properties
         var makeUserRepository: ((Application) -> UserRepository)?
+        var makeListingRepository: ((Application) -> ListingRepository)?
         
         // MARK: - Functions
         init() { }
