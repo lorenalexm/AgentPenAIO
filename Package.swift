@@ -16,6 +16,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/jwt.git", from: "4.2.2"),
         .package(url: "https://github.com/vapor/queues.git", from: "1.13.0"),
         .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.1"),
+        .package(url: "https://github.com/vadymmarkov/Fakery", from: "5.1.0")
     ],
     targets: [
         .executableTarget(
@@ -34,12 +35,11 @@ let package = Package(
             .target(name: "App"),
             .product(name: "XCTVapor", package: "vapor"),
             .product(name: "XCTQueues", package: "queues"),
-
-            // Workaround for https://github.com/apple/swift-package-manager/issues/6940
             .product(name: "Vapor", package: "vapor"),
             .product(name: "Fluent", package: "Fluent"),
             .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
             .product(name: "Leaf", package: "leaf"),
+            .product(name: "Fakery", package: "fakery")
         ])
     ]
 )
