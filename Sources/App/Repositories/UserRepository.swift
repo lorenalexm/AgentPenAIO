@@ -17,13 +17,13 @@ struct UserRepository: DatabaseRepository {
     /// Creates a new `User` within the `Database`.
     /// - Parameter user: The `User` object to be saved.
     func create(_ user: User) async throws {
-        return try await user.create(on: database)
+        try await user.create(on: database)
     }
     
     /// Deletes a `User` from the `Database`.
     /// - Parameter id: The unique identifier of the `User`.
     func delete(id: UUID) async throws {
-        return try await User.query(on: database)
+        try await User.query(on: database)
             .filter(\.$id == id)
             .delete()
     }
@@ -56,7 +56,7 @@ struct UserRepository: DatabaseRepository {
     ///   - value: The value to set to the field.
     ///   - id: The unique identifier of the `User`.
     func set<Field>(_ field: KeyPath<User, Field>, to value: Field.Value, for id: UUID) async throws where Field: QueryableProperty, Field.Model == User {
-        return try await User.query(on: database)
+        try await User.query(on: database)
             .filter(\.$id == id)
             .set(field, to: value)
             .update()
