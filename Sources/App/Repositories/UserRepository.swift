@@ -41,12 +41,34 @@ struct UserRepository: DatabaseRepository {
         return try await User.find(id, on: database)
     }
     
+    /// Finds a `User` from the `Database` by their unique identifier.
+    /// Loads the `Listing` children at the same time.
+    /// - Parameter id: The unique identifier of the `User`.
+    /// - Returns: A single `User` object.
+    func findWithChildren(id: UUID?) async throws -> User? {
+        return try await User.query(on: database)
+            .filter(\.$id == id!)
+            .with(\.$listings)
+            .first()
+    }
+    
     /// Finds a `User` from the `Database` by their email address.
     /// - Parameter email: The email address of the `User`.
     /// - Returns: A single `User` object
     func find(email: String) async throws -> User? {
         return try await User.query(on: database)
             .filter(\.$email == email)
+            .first()
+    }
+    
+    /// Finds a `User` from the `Database` by their email address.
+    /// Loads the `Listing` children at the same time.
+    /// - Parameter email: The email address of the `User`.
+    /// - Returns: A single `User` object
+    func findWithChildren(email: String) async throws -> User? {
+        return try await User.query(on: database)
+            .filter(\.$email == email)
+            .with(\.$listings)
             .first()
     }
     

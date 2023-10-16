@@ -27,6 +27,9 @@ final class User: Model, Authenticatable {
     @Field(key: "isEmailVerified")
     var isEmailVerified: Bool
     
+    @Children(for: \.$user)
+    var listings: [Listing]
+    
     // MARK: - Functions
     init() { }
     

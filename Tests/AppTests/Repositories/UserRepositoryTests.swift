@@ -78,12 +78,38 @@ final class UserRepositoryTests: XCTestCase {
         XCTAssertEqual(fetched?.id, user.id)
     }
     
+    /// Attempts to fetch a specific `User` and their `Listing` objects by `UUID` from the `Database`.
+    func testFindUserByIdWithChildren() async throws {
+        let user = try await createAndSaveUser(app: app)
+        let _ = try await createAndSaveListing(app: app, owner: user)
+        let _ = try await createAndSaveListing(app: app, owner: user)
+        
+        let fetched = try await repository.findWithChildren(id: user.id!)
+        XCTAssertNotNil(fetched)
+        XCTAssertEqual(fetched?.id, user.id)
+        XCTAssertNotNil(fetched?.listings)
+        XCTAssertEqual(fetched?.listings.count, 2)
+    }
+    
     /// Attempts to fetch a specific `User` object by email address from the `Database`.
     func testFindUserByEmail() async throws {
         let user = try await createAndSaveUser(app: app)
         let fetched = try await repository.find(email: user.email)
         XCTAssertNotNil(fetched)
         XCTAssertEqual(fetched?.id, user.id)
+    }
+    
+    /// Attempts to fetch a specific `User` and their `Listing` objects by email address from the `Database`.
+    func testFindUserByEmailWithChildren() async throws {
+        let user = try await createAndSaveUser(app: app)
+        let _ = try await createAndSaveListing(app: app, owner: user)
+        let _ = try await createAndSaveListing(app: app, owner: user)
+        
+        let fetched = try await repository.findWithChildren(email: user.email)
+        XCTAssertNotNil(fetched)
+        XCTAssertEqual(fetched?.id, user.id)
+        XCTAssertNotNil(fetched?.listings)
+        XCTAssertEqual(fetched?.listings.count, 2)
     }
     
     /// Attempts to update a `User` field on the `Database`.
@@ -95,5 +121,19 @@ final class UserRepositoryTests: XCTestCase {
         try await repository.set(\.$isEmailVerified, to: true, for: fetched!.id!)
         fetched = try await repository.find(id: user.id!)
         XCTAssertEqual(fetched?.isEmailVerified, true)
+    }
+    
+    /// Attempts to load `Listing` children from a `User` parent.
+    func testAddingListingsToUser() async throws {
+        let user = try await createAndSaveUser(app: app)
+        let _ = try await createAndSaveListing(app: app, owner: user)
+        let _ = try await createAndSaveListing(app: app, owner: user)
+        
+        let fetched = try await repository.find(email: user.email)
+        XCTAssertNotNil(fetched)
+        
+        let listings = try await user.$listings.get(on: repository.database)
+        XCTAssertNotNil(listings)
+        XCTAssertEqual(listings.count, 2)
     }
 }

@@ -43,7 +43,7 @@ func createListing(owner: User, revisions: Int? = nil) throws -> Listing {
 /// - Returns: The newly created `Listing` object.
 func createAndSaveListing(app: Application, owner: User) async throws -> Listing {
     let listing = try createListing(owner: owner)
-    try await app.repositories.listings.create(listing)
+    try await owner.$listings.create(listing, on: app.repositories.users.database)
     return listing
 }
 
