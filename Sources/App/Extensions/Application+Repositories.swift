@@ -27,10 +27,10 @@ extension Application {
             return storage(app)
         }
         
-        /// Verifies the `PropertyRepository` exists and returns it.
+        /// Verifies the `ListingRepository` exists and returns it.
         var listings: ListingRepository {
             guard let storage = storage.makeListingRepository else {
-                fatalError("PropertyRepository not configured, use: app.listingRepository.use()")
+                fatalError("ListingRepository not configured, use: app.listingRepository.use()")
             }
             
             return storage(app)
