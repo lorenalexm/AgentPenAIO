@@ -39,10 +39,7 @@ let package = Package(
             .target(name: "App"),
             .product(name: "XCTVapor", package: "vapor"),
             .product(name: "XCTQueues", package: "queues"),
-            .product(name: "Vapor", package: "vapor"),
-            .product(name: "Fluent", package: "Fluent"),
             .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
-            .product(name: "Leaf", package: "leaf"),
             .product(name: "Fakery", package: "fakery")
         ])
     ]
