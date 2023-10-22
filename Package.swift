@@ -19,7 +19,7 @@ let package = Package(
         .package(url: "https://github.com/vadymmarkov/Fakery", from: "5.1.0")
     ],
     targets: [
-        .executableTarget(
+        .target(
             name: "App",
             dependencies: [
                 .product(name: "Fluent", package: "fluent"),
@@ -31,6 +31,10 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
             ]
         ),
+        .executableTarget(name: "Run",
+                          dependencies: [
+                            .target(name: "App")
+                          ]),
         .testTarget(name: "AppTests", dependencies: [
             .target(name: "App"),
             .product(name: "XCTVapor", package: "vapor"),
