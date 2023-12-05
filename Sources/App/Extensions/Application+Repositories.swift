@@ -36,6 +36,15 @@ extension Application {
             return storage(app)
         }
         
+        /// Verifies the `GenerationRepository` exists and returns it.
+        var generations: GenerationRepository {
+            guard let storage = storage.makeGenerationRepository else {
+                fatalError("GenerationRepository not configured, use: app.generationRepository.use()")
+            }
+            
+            return storage(app)
+        }
+        
         /// Returns the `Storage` object, or creates one if it doesn't exist.
         var storage: Storage {
             if app.storage[Key.self] == nil {
@@ -57,6 +66,10 @@ extension Application {
         func use(_ make: @escaping (Application) -> (ListingRepository)) {
             storage.makeListingRepository = make
         }
+        
+        func use(_ make: @escaping (Application) -> (GenerationRepository)) {
+            storage.makeGenerationRepository = make
+        }
     }
 }
 
@@ -67,6 +80,7 @@ extension Application.Repositories {
             .init {
                 $0.repositories.use { UserRepository(database: $0.db) }
                 $0.repositories.use { ListingRepository(database: $0.db) }
+                $0.repositories.use { GenerationRepository(database: $0.db) }
             }
         }
         let run: (Application) -> ()
@@ -84,6 +98,7 @@ extension Application.Repositories {
         // MARK: - Properties
         var makeUserRepository: ((Application) -> UserRepository)?
         var makeListingRepository: ((Application) -> ListingRepository)?
+        var makeGenerationRepository: ((Application) -> GenerationRepository)?
         
         // MARK: - Functions
         init() { }

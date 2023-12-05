@@ -6,7 +6,6 @@ import Leaf
 import Vapor
 
 public func configure(_ app: Application) async throws {
-    
     // MARK: - Database
     if app.environment == .testing {
         app.databases.use(.sqlite(.memory), as: .sqlite)
