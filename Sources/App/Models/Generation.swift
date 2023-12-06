@@ -29,4 +29,14 @@ final class Generation: Model {
     
     @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    // MARK: - Functions
+    init() { }
+    
+    init(id: UUID? = nil, listing: Listing.IDValue, type: GenerationType, generated: String) {
+        self.id = id
+        self.$listing.id = listing
+        self.type = type
+        self.generated = generated
+    }
 }

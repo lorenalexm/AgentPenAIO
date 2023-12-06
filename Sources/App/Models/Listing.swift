@@ -18,6 +18,9 @@ final class Listing: Model {
     @Parent(key: "userId")
     var user: User
     
+    @Children(for: \.$listing)
+    var generations: [Generation]
+    
     @Field(key: "streetAddress")
     var streetAddress: String
     
