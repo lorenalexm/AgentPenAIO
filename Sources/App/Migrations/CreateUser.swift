@@ -19,6 +19,8 @@ struct CreateUser: AsyncMigration {
             .field("passwordHash", .string, .required)
             .field("fullName", .string, .required)
             .field("isEmailVerified", .bool, .required, .custom("DEFAULT FALSE"))
+            .field("createdAt", .datetime)
+            .field("updatedAt", .datetime)
             .unique(on: "email")
             .create()
     }

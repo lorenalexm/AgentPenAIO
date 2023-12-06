@@ -25,6 +25,8 @@ struct CreateGeneration: AsyncMigration {
             .field("listingId", .uuid, .required)
             .field("type", type, .required)
             .field("generated", .string, .required)
+            .field("createdAt", .datetime)
+            .field("updatedAt", .datetime)
             .create()
     }
     

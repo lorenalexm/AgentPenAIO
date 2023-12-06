@@ -66,6 +66,12 @@ final class Listing: Model {
     @Field(key: "revisions")
     var revisions: Int
     
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
+    
     // MARK: - Functions
     init() { }
     

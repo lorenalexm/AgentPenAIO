@@ -23,4 +23,10 @@ final class Generation: Model {
     
     @Field(key: "generated")
     var generated: String
+    
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
 }

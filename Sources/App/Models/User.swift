@@ -30,6 +30,12 @@ final class User: Model, Authenticatable {
     @Children(for: \.$user)
     var listings: [Listing]
     
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
+    
     // MARK: - Functions
     init() { }
     

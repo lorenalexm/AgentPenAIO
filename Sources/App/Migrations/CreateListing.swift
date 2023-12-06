@@ -32,6 +32,8 @@ struct CreateListing: AsyncMigration {
             .field("socialHashtags", .bool)
             .field("socialEmoji", .bool)
             .field("revisions", .int)
+            .field("createdAt", .datetime)
+            .field("updatedAt", .datetime)
             .create()
     }
     
