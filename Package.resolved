@@ -325,6 +325,15 @@
       }
     },
     {
+      "identity" : "vapor-firebase-jwt-middleware",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/emvakar/vapor-firebase-jwt-middleware.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "9dfe7a9ea9a2ccdd41a0eaab0c7bea3c54f24e45"
+      }
+    },
+    {
       "identity" : "websocket-kit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/websocket-kit.git",
