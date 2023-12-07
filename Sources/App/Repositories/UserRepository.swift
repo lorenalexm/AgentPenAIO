@@ -72,6 +72,26 @@ struct UserRepository: DatabaseRepository {
             .first()
     }
     
+    /// Finds a `User` from the `Database` by their Firebase ID.
+    /// - Parameter firebaseId: The Firebase ID of the `User`.
+    /// - Returns: A single `User` object
+    func find(firebaseId: String) async throws -> User? {
+        return try await User.query(on: database)
+            .filter(\.$firebaseId == firebaseId)
+            .first()
+    }
+    
+    /// Finds a `User` from the `Database` by their Firebase ID.
+    /// Loads the `Listing` children at the same time.
+    /// - Parameter firebaseId: The Firebase ID of the `User`.
+    /// - Returns: A single `User` object
+    func findWithChildren(firebaseId: String) async throws -> User? {
+        return try await User.query(on: database)
+            .filter(\.$firebaseId == firebaseId)
+            .with(\.$listings)
+            .first()
+    }
+    
     /// Sets the value of a `QueryableProperty` for a given `User`.
     /// - Parameters:
     ///   - field: The `User` field that will be updated.

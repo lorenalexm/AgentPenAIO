@@ -15,12 +15,13 @@ struct CreateUser: AsyncMigration {
     func prepare(on database: Database) async throws {
         return try await database.schema("users")
             .id()
+            .field("firebaseId", .string, .required)
             .field("email", .string, .required)
-            .field("passwordHash", .string, .required)
             .field("fullName", .string, .required)
-            .field("isEmailVerified", .bool, .required, .custom("DEFAULT FALSE"))
+            .field("credits", .int, .required, .sql(.default(0)))
             .field("createdAt", .datetime)
             .field("updatedAt", .datetime)
+            .unique(on: "firebaseId")
             .unique(on: "email")
             .create()
     }

@@ -15,8 +15,8 @@ import Vapor
 func createUser() -> User {
     let faker = Faker()
     
-    return User(email: faker.internet.email(),
-                passwordHash: faker.internet.password(minimumLength: 8, maximumLength: 24),
+    return User(firebaseId: UUID().uuidString,
+                email: faker.internet.email(),
                 fullName: faker.name.name())
 }
 

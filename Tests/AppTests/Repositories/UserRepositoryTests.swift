@@ -40,8 +40,8 @@ final class UserRepositoryTests: XCTestCase {
     
     /// Attempts to create two `User` objects with the same email address.
     func testCreatingUserWithDuplicateEmail() async throws {
-        let user = User(email: "test@test.com", passwordHash: "123", fullName: "Test User")
-        let user2 = User(email: "test@test.com", passwordHash: "123", fullName: "Test User")
+        let user = User(firebaseId: UUID().uuidString, email: "test@test.com", fullName: "Test User")
+        let user2 = User(firebaseId: UUID().uuidString, email: "test@test.com", fullName: "Test User")
         try await repository.create(user)
         await assertThrowsAsyncError(try await repository.create(user2)) { error in
             XCTAssertEqual(error.localizedDescription, "constraint: UNIQUE constraint failed: users.email")
@@ -97,6 +97,7 @@ final class UserRepositoryTests: XCTestCase {
         let fetched = try await repository.find(email: user.email)
         XCTAssertNotNil(fetched)
         XCTAssertEqual(fetched?.id, user.id)
+        XCTAssertEqual(fetched?.email, user.email)
     }
     
     /// Attempts to fetch a specific `User` and their `Listing` objects by email address from the `Database`.
@@ -108,6 +109,30 @@ final class UserRepositoryTests: XCTestCase {
         let fetched = try await repository.findWithChildren(email: user.email)
         XCTAssertNotNil(fetched)
         XCTAssertEqual(fetched?.id, user.id)
+        XCTAssertEqual(fetched?.email, user.email)
+        XCTAssertNotNil(fetched?.listings)
+        XCTAssertEqual(fetched?.listings.count, 2)
+    }
+    
+    /// Attempts to fetch a specific `User` object by Firebase ID from the `Database`.
+    func testFindUserByFirebaseId() async throws {
+        let user = try await createAndSaveUser(app: app)
+        let fetched = try await repository.find(firebaseId: user.firebaseId)
+        XCTAssertNotNil(fetched)
+        XCTAssertEqual(fetched?.id, user.id)
+        XCTAssertEqual(fetched?.firebaseId, user.firebaseId)
+    }
+    
+    /// Attempts to fetch a specific `User` and their `Listing` objects by Firebase ID from the `Database`.
+    func testFindUserByFirebaseIdWithChildren() async throws {
+        let user = try await createAndSaveUser(app: app)
+        let _ = try await createAndSaveListing(app: app, owner: user)
+        let _ = try await createAndSaveListing(app: app, owner: user)
+        
+        let fetched = try await repository.findWithChildren(email: user.email)
+        XCTAssertNotNil(fetched)
+        XCTAssertEqual(fetched?.id, user.id)
+        XCTAssertEqual(fetched?.firebaseId, user.firebaseId)
         XCTAssertNotNil(fetched?.listings)
         XCTAssertEqual(fetched?.listings.count, 2)
     }
@@ -116,11 +141,11 @@ final class UserRepositoryTests: XCTestCase {
     func testSetFieldValue() async throws {
         let user = try await createAndSaveUser(app: app)
         var fetched = try await repository.find(id: user.id!)
-        XCTAssertEqual(fetched?.isEmailVerified, false)
+        XCTAssertEqual(fetched?.credits, 0)
         
-        try await repository.set(\.$isEmailVerified, to: true, for: fetched!.id!)
+        try await repository.set(\.$credits, to: 1, for: fetched!.id!)
         fetched = try await repository.find(id: user.id!)
-        XCTAssertEqual(fetched?.isEmailVerified, true)
+        XCTAssertEqual(fetched?.credits, 1)
     }
     
     /// Attempts to load `Listing` children from a `User` parent.

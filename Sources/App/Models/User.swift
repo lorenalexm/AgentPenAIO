@@ -15,17 +15,17 @@ final class User: Model, Authenticatable {
     @ID(key: .id)
     var id: UUID?
     
+    @Field(key: "firebaseId")
+    var firebaseId: String
+    
     @Field(key: "email")
     var email: String
-    
-    @Field(key: "passwordHash")
-    var passwordHash: String
     
     @Field(key: "fullName")
     var fullName: String
     
-    @Field(key: "isEmailVerified")
-    var isEmailVerified: Bool
+    @Field(key: "credits")
+    var credits: Int
     
     @Children(for: \.$user)
     var listings: [Listing]
@@ -42,15 +42,14 @@ final class User: Model, Authenticatable {
     /// Creates a `User` object.
     /// - Parameters:
     ///   - id: A unique identifier for this `User`.
+    ///   - firebaseId: A unique identifier provided by Firebase for this `User`.
     ///   - email: A unique email for the `User`.
-    ///   - passwordHash: The `User` password after being hashed.
     ///   - fullName: The first and last name of the `User`.
-    ///   - isEmailVerified: Flags the email as being verified or not. Defaults to `false`.
-    init(id: UUID? = nil, email: String, passwordHash: String, fullName: String, isEmailVerified: Bool = false) {
+    init(id: UUID? = nil, firebaseId: String, email: String, fullName: String, credits: Int = 0) {
         self.id = id
+        self.firebaseId = firebaseId
         self.email = email
-        self.passwordHash = passwordHash
         self.fullName = fullName
-        self.isEmailVerified = isEmailVerified
+        self.credits = credits
     }
 }
