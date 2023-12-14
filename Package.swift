@@ -16,6 +16,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/queues.git", from: "1.13.0"),
         .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.1"),
         .package(url: "https://github.com/emvakar/vapor-firebase-jwt-middleware.git", branch: "master"),
+        .package(url: "https://github.com/vapor-community/stripe-kit.git", from: "22.0.0"),
         .package(url: "https://github.com/vadymmarkov/Fakery", from: "5.1.0")
     ],
     targets: [
@@ -29,6 +30,7 @@ let package = Package(
                 .product(name: "Leaf", package: "leaf"),
                 .product(name: "QueuesRedisDriver", package: "queues-redis-driver"),
                 .product(name: "FirebaseJWTMiddleware", package: "vapor-firebase-jwt-middleware"),
+                .product(name: "StripeKit", package: "stripe-kit")
             ]
         ),
         .executableTarget(name: "Run",
