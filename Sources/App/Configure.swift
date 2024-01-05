@@ -21,6 +21,12 @@ public func configure(_ app: Application) async throws {
     }
 
     // MARK: - Middleware
+    let corsConfiguration = CORSMiddleware.Configuration(
+        allowedOrigin: .all, 
+        allowedMethods: [.GET, .POST],
+        allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin]
+    )
+    app.middleware.use(CORSMiddleware(configuration: corsConfiguration), at: .beginning)
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     
     // MARK: - Services
