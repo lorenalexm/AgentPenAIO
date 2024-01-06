@@ -52,4 +52,10 @@ final class User: Model {
         self.fullName = fullName
         self.credits = credits
     }
+    
+    /// Builds a `UserDTO` object from the current `User`.
+    /// - Returns: The newly created `UserDTO` object.
+    func toDTO() -> UserDTO {
+        return UserDTO(from: self)
+    }
 }
