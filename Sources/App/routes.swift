@@ -1,8 +1,14 @@
-import Fluent
+//
+//  Routes.swift
+//  
+//
+//  Created by Alex Loren on 12/18/23.
+//
+
 import Vapor
 
+/// Registers all of the `Route` and `RouteCollection` objects.
+/// - Parameter app: The `Application` object to run migrations on.
 func routes(_ app: Application) throws {
-    app.get { req async throws in
-        try await req.view.render("index", ["title": "Hello Vapor!"])
-    }
+    try app.register(collection: AuthController(app: app))
 }
