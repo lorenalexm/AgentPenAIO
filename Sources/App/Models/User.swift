@@ -8,7 +8,7 @@
 import Vapor
 import Fluent
 
-final class User: Model, Authenticatable {
+final class User: Model {
     // MARK: - Properties
     static let schema = "users"
     
