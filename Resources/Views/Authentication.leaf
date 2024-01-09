@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Authentication</title>
+
+		<!-- BEGIN FIREBASE -->
+		<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.js"></script>
+		<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.css" />
+
+		<script type="module">
+			import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+			import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+			const firebaseConfig = {
+				apiKey: #(firebaseApiKey),
+				authDomain: #(firebaseAuthDomain),
+				projectId: #(firebaseProjectId),
+				storageBucket: #(firebaseStorageBucket),
+				messagingSenderId: #(firebaseMessageSenderId),
+				appId: "#(firebaseAppId)
+			};
+
+			const app = initializeApp(firebaseConfig);
+			const authInstance = getAuth(app);
+
+			var uiConfig = {
+				signInSuccessUrl: 'http://localhost:8080/me',
+				signInOptions: [
+					firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+					firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+				],
+				tosUrl: 'http://localhost:8080/tos',
+				privacyPolicyUrl: 'http://localhost:8080/privacy'
+			};
+
+			const ui = new firebaseui.auth.AuthUI(authInstance);
+			ui.start("#firebaseui-auth-container", uiConfig);
+		</script>
+		<!-- END FIREBASE -->
+    </head>
+
+    <body>
+      <div id="firebaseui-auth-container"></div>
+    </body>
+</html>
+
+<style>
+.backgroundGradient1 {
+	width: 440px; 
+	height: 440px; 
+	border-radius: 6rem; 
+	background: radial-gradient(105.68% 45.69% at 92.95% 50%, rgba(105, 244, 253, 0.5) 0%, rgba(160, 255, 244, 0.095) 53.91%, rgba(254, 216, 255, 0) 100%), radial-gradient(103.18% 103.18% at 90.11% 102.39%, #C9FFF2 0%, rgba(230, 255, 250, 0) 100%), radial-gradient(90.45% 90.45% at 87.84% 9.55%, #FFD2F5 0%, rgba(254, 219, 246, 0) 100%), linear-gradient(135.66deg, rgba(203, 185, 255, 0.8) 14.89%, rgba(216, 202, 254, 0) 74.33%); 
+	background-blend-mode: normal,normal,normal,normal,normal,normal; 
+	filter: blur(77px);
+}
+</style>
