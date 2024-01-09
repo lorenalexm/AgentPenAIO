@@ -26,7 +26,22 @@ struct AuthController: RouteCollection {
     /// - Parameter req: Information about the request that was received.
     /// - Returns: The view that has been built.
     func index(req: Request) async throws -> View {
-        return try await req.view.render("Authentication")
+        guard let firebaseApiKey = Environment.get("FIREBASE_API_KEY"),
+              let firebaseAuthDomain = Environment.get("FIREBASE_AUTH_DOMAIN"),
+              let firebaseProjectId = Environment.get("FIREBASE_PROEJCT_ID"),
+              let firebaseStorageBucket = Environment.get("FIREBASE_STORAGE_BUCKET"),
+              let firebaseMessageSenderId = Environment.get("FIREBASE_MESSAGE_SENDER_ID"),
+              let firebaseAppId = Environment.get("FIREBASE_APP_ID") else {
+            fatalError("Unable to retrieve Firebase environment values!")
+        }
+        
+        let context = AuthContext(firebaseApiKey: firebaseApiKey,
+                                  firebaseAuthDomain: firebaseAuthDomain,
+                                  firebaseProjectId: firebaseProjectId,
+                                  firebaseStorageBucket: firebaseStorageBucket,
+                                  firebaseMessageSenderId: firebaseMessageSenderId,
+                                  firebaseAppId: firebaseAppId)
+        return try await req.view.render("Authentication", context)
     }
     
     /// Verifies a `User` exists within the `Database` or creates a new `User`.
