@@ -40,4 +40,8 @@ public func configure(_ app: Application) async throws {
     // MARK: - Application Setup
     try migrations(app)
     try routes(app)
+    
+    if app.environment == .development {
+        try await app.autoMigrate()
+    }
 }
