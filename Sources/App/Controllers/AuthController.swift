@@ -17,38 +17,21 @@ struct AuthController: RouteCollection {
     /// Groups each request into a collection.
     /// - Parameter routes: The `RoutesBuilder` object provided by the `Application`.
     func boot(routes: RoutesBuilder) throws {
-        let group = routes.grouped("auth")
-        group.get(use: index)
-        group.post(use: verifyOrCreate)
-    }
-    
-    /// Builds and returns the Authentication page.
-    /// - Parameter req: Information about the request that was received.
-    /// - Returns: The view that has been built.
-    func index(req: Request) async throws -> View {
-        guard let firebaseApiKey = Environment.get("FIREBASE_API_KEY"),
-              let firebaseAuthDomain = Environment.get("FIREBASE_AUTH_DOMAIN"),
-              let firebaseProjectId = Environment.get("FIREBASE_PROEJCT_ID"),
-              let firebaseStorageBucket = Environment.get("FIREBASE_STORAGE_BUCKET"),
-              let firebaseMessageSenderId = Environment.get("FIREBASE_MESSAGE_SENDER_ID"),
-              let firebaseAppId = Environment.get("FIREBASE_APP_ID") else {
-            fatalError("Unable to retrieve Firebase environment values!")
-        }
-        
-        let context = AuthContext(firebaseApiKey: firebaseApiKey,
-                                  firebaseAuthDomain: firebaseAuthDomain,
-                                  firebaseProjectId: firebaseProjectId,
-                                  firebaseStorageBucket: firebaseStorageBucket,
-                                  firebaseMessageSenderId: firebaseMessageSenderId,
-                                  firebaseAppId: firebaseAppId)
-        return try await req.view.render("Authentication", context)
+        routes.get("verify", use: verifyOrCreate)
     }
     
     /// Verifies a `User` exists within the `Database` or creates a new `User`.
     /// - Parameter req: Information about the request that was received.
     /// - Returns: A redirect to the profile page of the `User`.
     func verifyOrCreate(req: Request) async throws -> Response {
-        let token = try await req.firebaseJwt.asyncVerify()
+        let token: FirebaseJWTPayload
+        do {
+            token = try await req.firebaseJwt.asyncVerify()
+        } catch {
+            print("Failed to verify token!")
+            throw Abort(.badRequest, reason: "Unable to verify the Firebase token.")
+        }
+    
         if let user = try await app.repositories.users.find(firebaseId: token.userID) {
             guard let email = token.email else {
                 throw Abort(.badRequest, reason: "Firebase user does not have an email.")
@@ -70,6 +53,6 @@ struct AuthController: RouteCollection {
             try await app.repositories.users.create(user)
         }
         
-        return req.redirect(to: "/me")
+        return Response(status: .ok)
     }
 }
