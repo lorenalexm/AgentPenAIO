@@ -32,10 +32,10 @@ public func configure(_ app: Application) async throws {
     // MARK: - Services
     app.views.use(.leaf)
     app.repositories.use(.database)
-    guard let firebaseAppId = Environment.get("FIREBASE_APP_ID") else {
-        fatalError("Unable to retreive the Firebase App Id from the environment!")
+    guard let firebaseProjectId = Environment.get("FIREBASE_PROJECT_ID") else {
+        fatalError("Unable to retreive the Firebase Project Id from the environment!")
     }
-    app.firebaseJwt.applicationIdentifier = firebaseAppId
+    app.firebaseJwt.applicationIdentifier = firebaseProjectId
     
     // MARK: - Application Setup
     try migrations(app)
