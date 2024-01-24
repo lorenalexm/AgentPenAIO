@@ -67,6 +67,17 @@ struct ListingRepository: DatabaseRepository {
         return try await Listing.find(id, on: database)
     }
     
+    /// Finds a `Listing` from the `Database` by its unique identifier.
+    /// Loads `Generation` children at the same time.
+    /// - Parameter id: The unique identifier of the `Listing`.
+    /// - Returns: A single `Listing` object.
+    func findWithChildren(id: UUID) async throws -> Listing? {
+        return try await Listing.query(on: database)
+            .filter(\.$id == id)
+            .with(\.$generations)
+            .first()
+    }
+    
     /// Sets the value of a `QueryableProperty` for a given `Listing`.
     /// - Parameters:
     ///   - field: The `Property` field that will be updated.

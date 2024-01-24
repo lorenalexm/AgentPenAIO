@@ -68,6 +68,18 @@ final class ListingRepositoryTests: XCTestCase {
         XCTAssertEqual(listing.id, fetched?.id)
     }
     
+    /// Attempts to fetch a specific `Listing` and its `Generation` objects by `UUID` from the `Database`.
+    func testFindListingByIdWithChildren() async throws {
+        let user = try await createAndSaveUser(app: app)
+        let listing = try await createAndSaveListing(app: app, owner: user)
+        let _ = try await createAndSaveGeneration(app: app, for: listing)
+        let _ = try await createAndSaveGeneration(app: app, for: listing)
+        let _ = try await createAndSaveGeneration(app: app, for: listing)
+        let fetched = try await repository.findWithChildren(id: listing.id!)
+        XCTAssertEqual(listing.id, fetched?.id)
+        XCTAssertEqual(fetched?.generations.count, 3)
+    }
+    
     /// Attempts to update a `User` field on the `Database`.
     func testSetFieldValue() async throws {
         let user = try await createAndSaveUser(app: app)
