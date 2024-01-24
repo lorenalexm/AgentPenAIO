@@ -56,7 +56,7 @@ func getFirebaseToken() async throws -> String {
     request.addValue("application/json", forHTTPHeaderField: "Content-Type")
     request.httpBody = jsonData
     
-    let (data, _) = try await URLSession.shared.data(for: request)
+    let (data, _) = try await URLSession.shared.asyncData(for: request)
     let response = try JSONDecoder().decode(FirebaseLoginResponse.self, from: data)
     return response.idToken
 }
@@ -80,7 +80,7 @@ func addFirebaseDisplayName(apiKey: String, idToken: String) async throws {
     request.addValue("application/json", forHTTPHeaderField: "Content-Type")
     request.httpBody = jsonData
     
-    let (data, _) = try await URLSession.shared.data(for: request)
+    let (data, _) = try await URLSession.shared.asyncData(for: request)
     let response = String(decoding: data, as: UTF8.self)
     print("\n\n\(response)\n\n")
 }
