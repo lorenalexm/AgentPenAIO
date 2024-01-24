@@ -36,6 +36,6 @@ struct UserDTO: Content {
     /// Created from an already existing `User` object.
     /// - Parameter user: The `User` object to create the `UserDTO` from.
     init(from user: User) {
-        self.init(id: user.id, fullName: user.fullName, email: user.email, credits: user.credits, listings: user.listings)
+        self.init(id: user.id, fullName: user.fullName, email: user.email, credits: user.credits, listings: user.$listings.wrappedValue)
     }
 }

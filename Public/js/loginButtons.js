@@ -53,7 +53,7 @@ function createButton(text, auth, provider, embedInID = "") {
 function processSignIn(auth, provider) {
 	signInWithPopup(auth, provider).then((result) => {
 		result.user.getIdToken().then((token) => {
-			fetch(`${window.location.origin}/verify`, {
+			fetch(`${window.location.origin}/api/user/verify`, {
 				method: "GET",
 				cache: "no-cache",
 				headers: {
@@ -68,6 +68,6 @@ function processSignIn(auth, provider) {
 			window.location.assign(`${window.location.origin}/authentication`);
 		});
 	}).catch(() => {
-		window.location.assign(`${window.location.origin}/auth`);
+		window.location.assign(`${window.location.origin}/authentication`);
 	});
 }

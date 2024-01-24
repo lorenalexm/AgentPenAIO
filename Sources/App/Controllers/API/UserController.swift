@@ -1,5 +1,5 @@
 //
-//  AuthController.swift
+//  UserController.swift
 //
 //
 //  Created by Alex Loren on 1/5/24.
@@ -8,7 +8,7 @@
 import Vapor
 import FirebaseJWTMiddleware
 
-struct AuthController: RouteCollection {
+struct UserController: RouteCollection {
     // MARK: - Properties.
     let app: Application
     
@@ -17,18 +17,38 @@ struct AuthController: RouteCollection {
     /// Groups each request into a collection.
     /// - Parameter routes: The `RoutesBuilder` object provided by the `Application`.
     func boot(routes: RoutesBuilder) throws {
-        routes.get("verify", use: verifyOrCreate)
+        let api = routes.grouped("api")
+        let grouped = api.grouped("user")
+        grouped.get(use: getUser)
+        grouped.get("verify", use: verifyOrCreate)
+    }
+    
+    /// Returns a `UserDTO` of a `User` based on their Firebase user Id.
+    /// - Parameter req: Information about the request that was received.
+    /// - Returns: A `UserDTO` from the matching `User` object.
+    func getUser(req: Request) async throws -> UserDTO {
+        let token: FirebaseJWTPayload
+        do {
+            token = try await req.firebaseJwt.asyncVerify()
+        } catch {
+            throw Abort(.badRequest, reason: "Unable to verify the Firebase token.")
+        }
+        
+        if let user = try await app.repositories.users.findWithChildren(firebaseId: token.userID) {
+            return user.toDTO()
+        }
+        
+        throw Abort(.notFound, reason: "Unable to find User with Firebase user Id.")
     }
     
     /// Verifies a `User` exists within the `Database` or creates a new `User`.
     /// - Parameter req: Information about the request that was received.
-    /// - Returns: A redirect to the profile page of the `User`.
+    /// - Returns: An `HTTPResponseStatus` based on either errors, or a found or created `User`.
     func verifyOrCreate(req: Request) async throws -> Response {
         let token: FirebaseJWTPayload
         do {
             token = try await req.firebaseJwt.asyncVerify()
         } catch {
-            print("Failed to verify token!")
             throw Abort(.badRequest, reason: "Unable to verify the Firebase token.")
         }
     
@@ -40,6 +60,7 @@ struct AuthController: RouteCollection {
             guard email == user.email else {
                 throw Abort(.badRequest, reason: "Firebase user email does not match local user email.")
             }
+            return Response(status: .ok)
         } else {
             guard let email = token.email else {
                 throw Abort(.badRequest, reason: "Firebase user does not have an email.")
@@ -51,8 +72,7 @@ struct AuthController: RouteCollection {
             
             let user = User(firebaseId: token.userID, email: email, fullName: name)
             try await app.repositories.users.create(user)
+            return Response(status: .created)
         }
-        
-        return Response(status: .ok)
     }
 }
