@@ -60,7 +60,7 @@ function processSignIn(auth, provider) {
 					"Authorization": `Bearer ${token}`
 				}
 			}).then(() => {
-				window.location.assign(`${window.location.origin}/me`);
+				window.location.assign(`${window.location.origin}/profile`);
 			}).catch(() => {
 				window.location.assign(`${window.location.origin}/authentication`);
 			});
