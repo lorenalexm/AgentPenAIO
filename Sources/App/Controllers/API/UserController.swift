@@ -63,17 +63,4 @@ struct UserController: RouteCollection {
             return Response(status: .created)
         }
     }
-    
-    /// Verifies the Firebase token from the Bearer header.
-    /// - Parameter req: Information about the request that was received.
-    /// - Returns: The decoded `FirebaseJWTPayload` from the token.
-    func verifyToken(on req: Request) async throws-> FirebaseJWTPayload {
-        let payload: FirebaseJWTPayload
-        do {
-            payload = try await req.firebaseJwt.asyncVerify()
-        } catch {
-            throw Abort(.badRequest, reason: "Unable to verify the Firebase token.")
-        }
-        return payload
-    }
 }
