@@ -27,13 +27,7 @@ struct UserController: RouteCollection {
     /// - Parameter req: Information about the request that was received.
     /// - Returns: A `UserDTO` from the matching `User` object.
     func getUser(req: Request) async throws -> UserDTO {
-        let token: FirebaseJWTPayload
-        do {
-            token = try await req.firebaseJwt.asyncVerify()
-        } catch {
-            throw Abort(.badRequest, reason: "Unable to verify the Firebase token.")
-        }
-        
+        let token = try await req.verifyToken()
         if let user = try await app.repositories.users.findWithChildren(firebaseId: token.userID) {
             return user.toDTO()
         }
@@ -45,13 +39,7 @@ struct UserController: RouteCollection {
     /// - Parameter req: Information about the request that was received.
     /// - Returns: An `HTTPResponseStatus` based on either errors, or a found or created `User`.
     func verifyOrCreate(req: Request) async throws -> Response {
-        let token: FirebaseJWTPayload
-        do {
-            token = try await req.firebaseJwt.asyncVerify()
-        } catch {
-            throw Abort(.badRequest, reason: "Unable to verify the Firebase token.")
-        }
-    
+        let token = try await req.verifyToken()
         if let user = try await app.repositories.users.find(firebaseId: token.userID) {
             guard let email = token.email else {
                 throw Abort(.badRequest, reason: "Firebase user does not have an email.")
@@ -74,5 +62,18 @@ struct UserController: RouteCollection {
             try await app.repositories.users.create(user)
             return Response(status: .created)
         }
+    }
+    
+    /// Verifies the Firebase token from the Bearer header.
+    /// - Parameter req: Information about the request that was received.
+    /// - Returns: The decoded `FirebaseJWTPayload` from the token.
+    func verifyToken(on req: Request) async throws-> FirebaseJWTPayload {
+        let payload: FirebaseJWTPayload
+        do {
+            payload = try await req.firebaseJwt.asyncVerify()
+        } catch {
+            throw Abort(.badRequest, reason: "Unable to verify the Firebase token.")
+        }
+        return payload
     }
 }
