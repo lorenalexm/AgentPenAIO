@@ -8,7 +8,19 @@
 			import { verifyAndGetUser, signout } from "./js/user.js"
 
 			const [_, auth] = initializeFirebase("#(apiKey)", "#(authDomain)", "#(projectId)", "#(storageBucket)", "#(messageSenderId)", "#(appId)");
-			const user = verifyAndGetUser(auth);
+			const user = verifyAndGetUser(auth).then((result) => {
+				result.json().then((user) => {
+					if(user.listings === undefined || user.listings.length == 0) {
+						console.log("No listings with user.");
+					}
+					document.getElementById("welcome").innerHTML = `<h3>Hello, ${user.fullName}</h3>`;
+				});
+			}).catch((error) => {
+				if(error == "NOUSER") {
+					window.location.assign(`${window.location.origin}/authentication`);
+				}
+				console.error(error);
+			});
 
 			const button = document.getElementById("signout");
 			button.addEventListener("click", () => {
@@ -18,6 +30,7 @@
     </head>
 
     <body>
+		<div id="welcome"></div>
 		<button id="signout">Signout</button>
     </body>
 </html>

@@ -1,18 +1,32 @@
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /**
- * Verifies and returns the current user, or redirects to authentication page if none.
+ * Ensures Firebase user is current, then fetches user data from server.
  * 
  * @param {object} auth The Firebase Auth object.
- * @returns {object} The current user object.
+ * @returns {Promise<object, error>} The current user object.
  */
 export function verifyAndGetUser(auth) {
-	onAuthStateChanged(auth, (user) => {
-		if(!user) {
-			window.location.assign(`${window.location.origin}/authentication`);
-		}
+	return new Promise((resolve, reject) => {
+		onAuthStateChanged(auth, (user) => {
+			if(!user) {
+				reject("NOUSER");
+			}
 
-		return user;
+			user.getIdToken().then((token) => {
+				fetch(`${window.location.origin}/api/user/`, {
+					method: "GET",
+					cache: "no-cache",
+					headers: {
+						"Authorization": `Bearer ${token}`
+					}
+				}).then((response) => {
+					resolve(response);
+				}).catch((error) => {
+					reject(error);
+				});
+			});
+		});
 	});
 }
 
