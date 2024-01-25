@@ -59,3 +59,5 @@ final class User: Model {
         return UserDTO(from: self)
     }
 }
+
+extension User: Content {}

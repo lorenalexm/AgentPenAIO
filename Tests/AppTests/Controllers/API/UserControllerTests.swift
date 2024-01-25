@@ -69,7 +69,7 @@ final class UserControllerTests: XCTestCase {
             request.headers.bearerAuthorization = try await BearerAuthorization(token: getOrReturnToken())
         }, afterResponse: { response in
             XCTAssertEqual(response.status, .ok)
-            let user = try response.content.decode(UserDTO.self)
+            let user = try response.content.decode(User.self)
             XCTAssertEqual(user.fullName, "Dummy User")
             XCTAssertEqual(user.email, "dummy@account.email")
         })

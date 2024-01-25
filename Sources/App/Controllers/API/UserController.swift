@@ -23,13 +23,13 @@ struct UserController: RouteCollection {
         grouped.get("verify", use: verifyOrCreate)
     }
     
-    /// Returns a `UserDTO` of a `User` based on their Firebase user Id.
+    /// Returns a `User` based on their Firebase user Id.
     /// - Parameter req: Information about the request that was received.
-    /// - Returns: A `UserDTO` from the matching `User` object.
-    func getUser(req: Request) async throws -> UserDTO {
+    /// - Returns: A matching `User` object.
+    func getUser(req: Request) async throws -> User {
         let token = try await req.verifyToken()
         if let user = try await app.repositories.users.findWithChildren(firebaseId: token.userID) {
-            return user.toDTO()
+            return user
         }
         
         throw Abort(.notFound, reason: "Unable to find User with Firebase user Id.")
