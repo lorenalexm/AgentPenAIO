@@ -21,7 +21,6 @@ final class ListingRepositoryTests: XCTestCase {
     override func setUp() async throws {
         app = try await Application.testable()
         repository = ListingRepository(database: app.db)
-        token = try await getOrReturnToken()
     }
     
     /// Tears down the testing environment before each test.
@@ -54,14 +53,14 @@ final class ListingRepositoryTests: XCTestCase {
     
     /// Attempts creating a `Listing` object and saving it to the `Database` under a `User`.
     func testCreatingListingForUser() async throws {
-        try await app.repositories.users.create(User(firebaseId: token!, email: "fake@user.email", fullName: "Dummy User"))
-        let user = try await app.repositories.users.find(firebaseId: token!)!
+        try await app.repositories.users.create(User(firebaseId: getOrReturnToken(), email: "fake@user.email", fullName: "Dummy User"))
+        let user = try await app.repositories.users.find(firebaseId: getOrReturnToken())!
         let listing = try createListing(owner: user)
         try await repository.create(listing, forOwner: user)
         let count = try await repository.count()
         XCTAssertEqual(count, 1)
         
-        let fetched = try await repository.find(id: listing.id!, ownedBy: token!)
+        let fetched = try await repository.find(id: listing.id!, ownedBy: getOrReturnToken())
         XCTAssertEqual(fetched?.city, listing.city)
         XCTAssertEqual(fetched?.$user.id, user.id)
     }
@@ -95,8 +94,8 @@ final class ListingRepositoryTests: XCTestCase {
             let _ = try await createAndSaveListing(app: app, owner: user)
         }
         
-        try await app.repositories.users.create(User(firebaseId: token!, email: "fake@user.email", fullName: "Dummy User"))
-        user = try await app.repositories.users.find(firebaseId: token!)!
+        try await app.repositories.users.create(User(firebaseId: getOrReturnToken(), email: "fake@user.email", fullName: "Dummy User"))
+        user = try await app.repositories.users.find(firebaseId: getOrReturnToken())!
         for _ in 0...3 {
             let _ = try await createAndSaveListing(app: app, owner: user)
         }
@@ -104,7 +103,7 @@ final class ListingRepositoryTests: XCTestCase {
         let count = try await repository.count()
         XCTAssertEqual(9, count)
         
-        let listings = try await repository.all(ownedBy: token!)
+        let listings = try await repository.all(ownedBy: getOrReturnToken())
         XCTAssertNotNil(listings)
         XCTAssertEqual(5, listings.count)
         XCTAssertEqual(listings[4].id, listing.id)
@@ -125,13 +124,13 @@ final class ListingRepositoryTests: XCTestCase {
             let _ = try await createAndSaveListing(app: app, owner: user)
         }
         
-        try await app.repositories.users.create(User(firebaseId: token!, email: "fake@user.email", fullName: "Dummy User"))
-        user = try await app.repositories.users.find(firebaseId: token!)!
+        try await app.repositories.users.create(User(firebaseId: getOrReturnToken(), email: "fake@user.email", fullName: "Dummy User"))
+        user = try await app.repositories.users.find(firebaseId: getOrReturnToken())!
         let listing = try await createAndSaveListing(app: app, owner: user)
         let count = try await repository.count()
         XCTAssertEqual(5, count)
         
-        let fetched = try await repository.find(id: listing.id!, ownedBy: token!)
+        let fetched = try await repository.find(id: listing.id!, ownedBy: getOrReturnToken())
         XCTAssertNotNil(fetched)
         XCTAssertEqual(fetched?.id, listing.id)
     }
@@ -145,12 +144,12 @@ final class ListingRepositoryTests: XCTestCase {
         }
         let listing = try await createAndSaveListing(app: app, owner: user)
         
-        try await app.repositories.users.create(User(firebaseId: token!, email: "fake@user.email", fullName: "Dummy User"))
-        user = try await app.repositories.users.find(firebaseId: token!)!
+        try await app.repositories.users.create(User(firebaseId: getOrReturnToken(), email: "fake@user.email", fullName: "Dummy User"))
+        user = try await app.repositories.users.find(firebaseId: getOrReturnToken())!
         let count = try await repository.count()
         XCTAssertEqual(5, count)
         
-        let fetched = try await repository.find(id: listing.id!, ownedBy: token!)
+        let fetched = try await repository.find(id: listing.id!, ownedBy: getOrReturnToken())
         XCTAssertNil(fetched)
     }
     
@@ -168,13 +167,13 @@ final class ListingRepositoryTests: XCTestCase {
     
     /// Attempts to fetch a specific `Listing` and its `Generation` objects by `UUID` from the `Database` owned by a specific Firebase Id.
     func testFindListingByIdWithChildrenWithFirebase() async throws {
-        try await app.repositories.users.create(User(firebaseId: token!, email: "fake@user.email", fullName: "Dummy User"))
-        let user = try await app.repositories.users.find(firebaseId: token!)!
+        try await app.repositories.users.create(User(firebaseId: getOrReturnToken(), email: "fake@user.email", fullName: "Dummy User"))
+        let user = try await app.repositories.users.find(firebaseId: getOrReturnToken())!
         let listing = try await createAndSaveListing(app: app, owner: user)
         for _ in 0...2 {
             let _ = try await createAndSaveGeneration(app: app, for: listing)
         }
-        let fetched = try await repository.findWithChildren(id: listing.id!, ownedBy: token!)
+        let fetched = try await repository.findWithChildren(id: listing.id!, ownedBy: getOrReturnToken())
         XCTAssertEqual(listing.id, fetched?.id)
         XCTAssertEqual(fetched?.generations.count, 3)
     }
@@ -182,14 +181,14 @@ final class ListingRepositoryTests: XCTestCase {
     /// Attempts to fetch a specific `Listing` and its `Generation` objects by `UUID` from the `Database` owned by a specific Firebase Id.
     /// Should fail as `User` does not have any listings.
     func testFailToFindListingByIdWithChildrenWithFirebase() async throws {
-        try await app.repositories.users.create(User(firebaseId: token!, email: "fake@user.email", fullName: "Dummy User"))
-        let _ = try await app.repositories.users.find(firebaseId: token!)!
+        try await app.repositories.users.create(User(firebaseId: getOrReturnToken(), email: "fake@user.email", fullName: "Dummy User"))
+        let _ = try await app.repositories.users.find(firebaseId: getOrReturnToken())!
         let user = try await createAndSaveUser(app: app)
         let listing = try await createAndSaveListing(app: app, owner: user)
         for _ in 0...2 {
             let _ = try await createAndSaveGeneration(app: app, for: listing)
         }
-        let fetched = try await repository.findWithChildren(id: listing.id!, ownedBy: token!)
+        let fetched = try await repository.findWithChildren(id: listing.id!, ownedBy: getOrReturnToken())
         XCTAssertNil(fetched)
     }
     
