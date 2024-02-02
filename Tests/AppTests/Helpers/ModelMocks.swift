@@ -33,6 +33,7 @@ func createAndSaveUser(app: Application) async throws -> User {
 
 /// Helper function to create a `Listing` object already populated.
 /// - Parameter owner: The `User` who should own this `Listing`.
+/// - Parameter revisions: An optional value to give to the revisions property.
 /// - Returns: The newly created `Listing` object.
 func createListing(owner: User, revisions: Int? = nil) throws -> Listing {
     let faker = Faker()
@@ -64,6 +65,19 @@ func createListing(owner: User, revisions: Int? = nil) throws -> Listing {
 /// - Returns: The newly created `Listing` object.
 func createAndSaveListing(app: Application, owner: User) async throws -> Listing {
     let listing = try createListing(owner: owner)
+    try await owner.$listings.create(listing, on: app.repositories.users.database)
+    return listing
+}
+
+/// Helper function to create a `Listing` object already populated.
+/// Saves this `Listing` to the `Database`.
+/// - Parameters:
+///   - app: The `Application` that contains our `Database` access.
+///   - owner: The `User` who should own this `Listing`.
+///   - revisions: An optional value to give to the revisions property.
+/// - Returns: The newly created `Listing` object.
+func createAndSaveListing(app: Application, owner: User, revisions: Int) async throws -> Listing {
+    let listing = try createListing(owner: owner, revisions: revisions)
     try await owner.$listings.create(listing, on: app.repositories.users.database)
     return listing
 }

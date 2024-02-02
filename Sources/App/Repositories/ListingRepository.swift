@@ -15,9 +15,17 @@ struct ListingRepository: DatabaseRepository {
     // MARK: - Functions
     
     /// Creates a new `Listing` within the `Database`.
-    /// - Parameter property: The `Listing` object to be saved.
+    /// - Parameter listing: The `Listing` object to be saved.
     func create(_ listing: Listing) async throws {
         try await listing.create(on: database)
+    }
+    
+    /// Creates a new `Listing` within the `Database` for a `User`.
+    /// - Parameters:
+    ///   - listing: The `Listing` object to be saved.
+    ///   - user: The `User` who will own this `Listing`.
+    func create(_ listing: Listing, forOwner user: User) async throws {
+        try await user.$listings.create(listing, on: database)
     }
     
     /// Deletes a `Listing` from the `Database`.
@@ -60,6 +68,17 @@ struct ListingRepository: DatabaseRepository {
         return try await Listing.query(on: database).all()
     }
     
+    /// Fetches all of the `Listing` objects from the `Database`.
+    /// Only `Listing` objects with the Firebase Id will be returned.
+    /// - Parameter firebaseId: A Firebase id belonging to a `User`.
+    /// - Returns: An array of `Listing` objects.
+    func all(ownedBy firebaseId: String) async throws -> [Listing] {
+        return try await Listing.query(on: database)
+            .join(User.self, on: \Listing.$user.$id == \User.$id)
+            .filter(User.self, \.$firebaseId == firebaseId)
+            .all()
+    }
+    
     /// Finds a `Listing` from the `Database` by its unique identifier.
     /// - Parameter id: The unique identifier of the `Listing`.
     /// - Returns: A single `Listing` object.
@@ -68,11 +87,41 @@ struct ListingRepository: DatabaseRepository {
     }
     
     /// Finds a `Listing` from the `Database` by its unique identifier.
+    /// Only a `Listing` matching the Firebase Id will be returned.
+    /// - Parameters:
+    ///   - id: The unique identifier of the `Listing`.
+    ///   - firebaseId: A Firebase Id beloning to a `User`.
+    /// - Returns: A single `Listing` object.
+    func find(id: UUID, ownedBy firebaseId: String) async throws -> Listing? {
+        return try await Listing.query(on: database)
+            .join(User.self, on: \Listing.$user.$id == \User.$id)
+            .filter(User.self, \.$firebaseId == firebaseId)
+            .filter(\.$id == id)
+            .first()
+    }
+    
+    /// Finds a `Listing` from the `Database` by its unique identifier.
     /// Loads `Generation` children at the same time.
     /// - Parameter id: The unique identifier of the `Listing`.
     /// - Returns: A single `Listing` object.
     func findWithChildren(id: UUID) async throws -> Listing? {
         return try await Listing.query(on: database)
+            .filter(\.$id == id)
+            .with(\.$generations)
+            .first()
+    }
+    
+    /// Finds a `Listing` from the `Database` by its unique identifier.
+    /// Loads `Generation` children at the same time.
+    /// Only a `Listing` matching the Firebase Id will be returned.
+    /// - Parameters:
+    ///   - id: The unique identifier of the `Listing`.
+    ///   - firebaseId: A Firebase Id beloning to a `User`.
+    /// - Returns: A single `Listing` object.
+    func findWithChildren(id: UUID, ownedBy firebaseId: String) async throws -> Listing? {
+        return try await Listing.query(on: database)
+            .join(User.self, on: \Listing.$user.$id == \User.$id)
+            .filter(User.self, \.$firebaseId == firebaseId)
             .filter(\.$id == id)
             .with(\.$generations)
             .first()
