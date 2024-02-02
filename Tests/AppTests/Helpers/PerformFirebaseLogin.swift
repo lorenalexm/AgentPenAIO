@@ -1,5 +1,5 @@
 //
-//  GetFirebaseToken.swift
+//  PerformFirebaseLogin.swift
 //
 //
 //  Created by Alex Loren on 1/24/24.
@@ -35,7 +35,7 @@ struct FirebaseLoginResponse: Codable {
 
 /// Logs in a dummy user to Firebase to obtain the token for testing.
 /// - Returns: A newly fetched Id Token from Firebase Auth.
-func getFirebaseToken() async throws -> String {
+func performFirebaseLogin() async throws -> FirebaseLoginResponse {
     guard let apiKey = Environment.get("FIREBASE_API_KEY"),
           let email = Environment.get("FIREBASE_USER_EMAIL"),
           let password = Environment.get("FIREBASE_USER_PASSWORD") else {
@@ -57,8 +57,7 @@ func getFirebaseToken() async throws -> String {
     request.httpBody = jsonData
     
     let (data, _) = try await URLSession.shared.asyncData(for: request)
-    let response = try JSONDecoder().decode(FirebaseLoginResponse.self, from: data)
-    return response.idToken
+    return try JSONDecoder().decode(FirebaseLoginResponse.self, from: data)
 }
 
 /// Sets the given Firebase user display name to "Dummy User'.

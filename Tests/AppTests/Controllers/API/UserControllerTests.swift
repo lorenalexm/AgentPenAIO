@@ -11,6 +11,7 @@ import XCTVapor
 final class UserControllerTests: XCTestCase {
     // MARK: - Properties
     var app: Application!
+    var firebaseResponse: FirebaseLoginResponse?
     var token: String?
     
     // MARK: - Functions
@@ -18,7 +19,7 @@ final class UserControllerTests: XCTestCase {
     /// Sets up the testing environment before each test.
     override func setUp() async throws {
         app = try await Application.testable()
-        token = try await getOrReturnToken()
+        token = try await getToken()
     }
     
     /// Tears down the testing environment before each test.
@@ -26,11 +27,22 @@ final class UserControllerTests: XCTestCase {
         app.shutdown()
     }
     
+    /// Attempts to perform a login with Firebase.
+    /// - Returns: A response from the Firebase Auth server.
+    func getFirebaseLoginResponse() async throws -> FirebaseLoginResponse {
+        guard let firebaseResponse else {
+            firebaseResponse = try await performFirebaseLogin()
+            return firebaseResponse!
+        }
+        
+        return firebaseResponse
+    }
+    
     /// Attempts to get a new token, or return the cached token.
     /// - Returns: A Firebase user Id token.
-    func getOrReturnToken() async throws -> String {
+    func getToken() async throws -> String {
         guard let token else {
-            self.token = try await getFirebaseToken()
+            token = try await getFirebaseLoginResponse().idToken
             return token!
         }
         
@@ -47,7 +59,7 @@ final class UserControllerTests: XCTestCase {
     /// Tests getting a `User` that does not exist.
     func testGettingInvalidUser() async throws {
         try await app.test(.GET, "/api/user/", beforeRequest: { request in
-            request.headers.bearerAuthorization = try await BearerAuthorization(token: getOrReturnToken())
+            request.headers.bearerAuthorization = try await BearerAuthorization(token: getToken())
         }, afterResponse: { response in
             XCTAssertEqual(response.status, .notFound)
         })
@@ -58,7 +70,7 @@ final class UserControllerTests: XCTestCase {
         try await app.test(.GET, "/api/user/verify", beforeRequest: { request in
             let count = try await app.repositories.users.count()
             XCTAssertEqual(count, 0)
-            request.headers.bearerAuthorization = try await BearerAuthorization(token: getOrReturnToken())
+            request.headers.bearerAuthorization = try await BearerAuthorization(token: getToken())
         }, afterResponse: { response in
             XCTAssertEqual(response.status, .created)
             let count = try await app.repositories.users.count()
@@ -66,7 +78,7 @@ final class UserControllerTests: XCTestCase {
         })
         
         try await app.test(.GET, "/api/user", beforeRequest: { request in
-            request.headers.bearerAuthorization = try await BearerAuthorization(token: getOrReturnToken())
+            request.headers.bearerAuthorization = try await BearerAuthorization(token: getToken())
         }, afterResponse: { response in
             XCTAssertEqual(response.status, .ok)
             let user = try response.content.decode(User.self)
@@ -89,7 +101,7 @@ final class UserControllerTests: XCTestCase {
         try await app.test(.GET, "/api/user/verify", beforeRequest: { request in
             let count = try await app.repositories.users.count()
             XCTAssertEqual(count, 0)
-            request.headers.bearerAuthorization = try await BearerAuthorization(token: getOrReturnToken())
+            request.headers.bearerAuthorization = try await BearerAuthorization(token: getToken())
         }, afterResponse: { response in
             XCTAssertEqual(response.status, .created)
             let count = try await app.repositories.users.count()
@@ -102,7 +114,7 @@ final class UserControllerTests: XCTestCase {
         try await app.test(.GET, "/api/user/verify", beforeRequest: { request in
             let count = try await app.repositories.users.count()
             XCTAssertEqual(count, 0)
-            request.headers.bearerAuthorization = try await BearerAuthorization(token: getOrReturnToken())
+            request.headers.bearerAuthorization = try await BearerAuthorization(token: getToken())
         }, afterResponse: { response in
             XCTAssertEqual(response.status, .created)
             let count = try await app.repositories.users.count()
@@ -110,7 +122,7 @@ final class UserControllerTests: XCTestCase {
         })
         
         try await app.test(.GET, "/api/user/verify", beforeRequest: { request in
-            request.headers.bearerAuthorization = try await BearerAuthorization(token: getOrReturnToken())
+            request.headers.bearerAuthorization = try await BearerAuthorization(token: getToken())
         }, afterResponse: { response in
             XCTAssertEqual(response.status, .ok)
             let count = try await app.repositories.users.count()
