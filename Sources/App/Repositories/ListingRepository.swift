@@ -62,9 +62,51 @@ struct ListingRepository: DatabaseRepository {
             .update()
     }
     
+    /// Updates a `Listing` from the `Database` from a source `Listing` object.
+    /// Only `Listing` objects with the Firebase Id will be updated.
+    /// - Parameters:
+    ///   - id: The unique identifier of the `Listing`.
+    ///   - source: The new source of data for a `Listing` object.
+    ///   - firebaseId: A Firebase id belonging to a `User`.
+    func update(id: UUID, with source: Listing, ownedBy firebaseId: String) async throws {
+        let listing = try await Listing.query(on: database)
+            .join(User.self, on: \Listing.$user.$id == \User.$id)
+            .filter(User.self, \.$firebaseId == firebaseId)
+            .filter(\.$id == id)
+            .first()
+        
+        guard let listing else {
+            throw Abort(.notFound, reason: "Unable to find any matching Listings.")
+        }
+        
+        guard let id = listing.id else {
+            throw Abort(.badRequest, reason: "Unable to parse UUID from Listing.")
+        }
+            
+        return try await Listing.query(on: database)
+            .filter(\.$id == id)
+            .set(\.$streetAddress, to: source.streetAddress)
+            .set(\.$city, to: source.city)
+            .set(\.$state, to: source.state)
+            .set(\.$structureType, to: source.structureType)
+            .set(\.$architectureType, to: source.architectureType)
+            .set(\.$bedrooms, to: source.bedrooms)
+            .set(\.$bathrooms, to: source.bathrooms)
+            .set(\.$squareFeet, to: source.squareFeet)
+            .set(\.$acerage, to: source.acerage)
+            .set(\.$propertyFeatures, to: source.propertyFeatures)
+            .set(\.$communityAmenities, to: source.communityAmenities)
+            .set(\.$writingStyle, to: source.writingStyle)
+            .set(\.$characterLimit, to: source.characterLimit)
+            .set(\.$socialHashtags, to: source.socialHashtags)
+            .set(\.$socialEmoji, to: source.socialEmoji)
+            .set(\.$revisions, to: source.revisions)
+            .update()
+    }
+    
     /// Fetches all of the `Listing` objects from the `Database`.
     /// - Returns: An array of `Listing` objects.
-    func all() async throws -> [Listing] {
+    func all() async throws -> [Listing]? {
         return try await Listing.query(on: database).all()
     }
     
@@ -72,7 +114,7 @@ struct ListingRepository: DatabaseRepository {
     /// Only `Listing` objects with the Firebase Id will be returned.
     /// - Parameter firebaseId: A Firebase id belonging to a `User`.
     /// - Returns: An array of `Listing` objects.
-    func all(ownedBy firebaseId: String) async throws -> [Listing] {
+    func all(ownedBy firebaseId: String) async throws -> [Listing]? {
         return try await Listing.query(on: database)
             .join(User.self, on: \Listing.$user.$id == \User.$id)
             .filter(User.self, \.$firebaseId == firebaseId)
@@ -134,6 +176,34 @@ struct ListingRepository: DatabaseRepository {
     ///   - id: The unique identifier of the `Listing`.
     func set<Field>(_ field: KeyPath<Listing, Field>, to value: Field.Value, for id: UUID) async throws where Field: QueryableProperty, Field.Model == Listing {
         try await Listing.query(on: database)
+            .filter(\.$id == id)
+            .set(field, to: value)
+            .update()
+    }
+    
+    /// Sets the value of a `QueryableProperty` for a given `Listing`.
+    /// Only `Listing` objects with the Firebase Id will be updated.
+    /// - Parameters:
+    ///   - field: The `Property` field that will be updated.
+    ///   - value: The value to set to the field.
+    ///   - id: The unique identifier of the `Listing`.
+    ///   - firebaseId: A Firebase Id beloning to a `User`.
+    func set<Field>(_ field: KeyPath<Listing, Field>, to value: Field.Value, for id: UUID, ownedBy firebaseId: String) async throws where Field: QueryableProperty, Field.Model == Listing {
+        let listing = try await Listing.query(on: database)
+            .join(User.self, on: \Listing.$user.$id == \User.$id)
+            .filter(User.self, \.$firebaseId == firebaseId)
+            .filter(\.$id == id)
+            .first()
+        
+        guard let listing else {
+            throw Abort(.notFound, reason: "Unable to find any matching Listings.")
+        }
+        
+        guard let id = listing.id else {
+            throw Abort(.badRequest, reason: "Unable to parse UUID from Listing.")
+        }
+            
+        return try await Listing.query(on: database)
             .filter(\.$id == id)
             .set(field, to: value)
             .update()

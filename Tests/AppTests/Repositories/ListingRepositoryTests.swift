@@ -95,7 +95,7 @@ final class ListingRepositoryTests: XCTestCase {
         for _ in 0...2 {
             let _ = try await createAndSaveListing(app: app, owner: user)
         }
-        let listings = try await repository.all()
+        let listings = try await repository.all()!
         XCTAssertEqual(listings.count, 3)
     }
     
@@ -115,7 +115,7 @@ final class ListingRepositoryTests: XCTestCase {
         let count = try await repository.count()
         XCTAssertEqual(9, count)
         
-        let listings = try await repository.all(ownedBy: getToken())
+        let listings = try await repository.all(ownedBy: getToken())!
         XCTAssertNotNil(listings)
         XCTAssertEqual(5, listings.count)
         XCTAssertEqual(listings[4].id, listing.id)
@@ -216,6 +216,36 @@ final class ListingRepositoryTests: XCTestCase {
         XCTAssertEqual(fetched?.revisions, 9)
     }
     
+    /// Attempts to update a `User` field on the `Database` owned by a specific Firebase Id.
+    func testSetFieldValueWithFirebase() async throws {
+        try await app.repositories.users.create(User(firebaseId: getToken(), email: "fake@user.email", fullName: "Dummy User"))
+        let user = try await app.repositories.users.find(firebaseId: getToken())!
+        let listing = try createListing(owner: user, revisions: 0)
+        try await repository.create(listing, forOwner: user)
+        XCTAssertEqual(listing.revisions, 0)
+        
+        try await repository.set(\.$revisions, to: 9, for: listing.id!, ownedBy: getToken())
+        let fetched = try await repository.find(id: listing.id!)
+        XCTAssertEqual(fetched?.revisions, 9)
+    }
+    
+    /// Attempts to update a `User` field on the `Database` owned by a specific Firebase Id.
+    /// Should fail as `User` does not have any listings.
+    func testFailToSetFieldValueWithFirebase() async throws {
+        try await app.repositories.users.create(User(firebaseId: getToken(), email: "fake@user.email", fullName: "Dummy User"))
+        let _ = try await app.repositories.users.find(firebaseId: getToken())!
+        let user = try await createAndSaveUser(app: app)
+        let listing = try createListing(owner: user, revisions: 0)
+        try await repository.create(listing, forOwner: user)
+        XCTAssertEqual(listing.revisions, 0)
+
+        await assertThrowsAsyncError(try await repository.set(\.$revisions, to: 9, for: listing.id!, ownedBy: getToken())) { error in
+            XCTAssertEqual(error.localizedDescription, "Abort.404: Unable to find any matching Listings.")
+        }
+        let fetched = try await repository.find(id: listing.id!, ownedBy: getToken())
+        XCTAssertNil(fetched)
+    }
+    
     /// Attempts to update a `User` object on the `Database` with completely new data.
     func testUpdateListing() async throws {
         let user = try await createAndSaveUser(app: app)
@@ -229,5 +259,40 @@ final class ListingRepositoryTests: XCTestCase {
         
         fetched = try await repository.find(id: listing.id!)
         XCTAssertEqual(fetched?.streetAddress, newListingData.streetAddress)
+    }
+    
+    /// Attempts to update a `User` object on the `Database` with completely new data owned by a specific Firebase Id.
+    func testUpdateListingWithFirebase() async throws {
+        try await app.repositories.users.create(User(firebaseId: getToken(), email: "fake@user.email", fullName: "Dummy User"))
+        let user = try await app.repositories.users.find(firebaseId: getToken())!
+        let listing = try await createAndSaveListing(app: app, owner: user)
+        var fetched = try await repository.find(id: listing.id!, ownedBy: getToken())
+        XCTAssertEqual(listing.streetAddress, fetched?.streetAddress)
+        
+        let newListingData = try createListing(owner: user)
+        try await repository.update(id: listing.id!, with: newListingData, ownedBy: getToken())
+        XCTAssertNotEqual(fetched?.streetAddress, newListingData.streetAddress)
+        
+        fetched = try await repository.find(id: listing.id!, ownedBy: getToken())
+        XCTAssertEqual(fetched?.streetAddress, newListingData.streetAddress)
+    }
+    
+    /// Attempts to update a `User` object on the `Database` with completely new data owned by a specific Firebase Id.
+    /// Should fail as `User` does not have any listings.
+    func testFailToUpdateListingWithFirebase() async throws {
+        try await app.repositories.users.create(User(firebaseId: getToken(), email: "fake@user.email", fullName: "Dummy User"))
+        let _ = try await app.repositories.users.find(firebaseId: getToken())!
+        let user = try await createAndSaveUser(app: app)
+        let listing = try await createAndSaveListing(app: app, owner: user)
+        var fetched = try await repository.find(id: listing.id!, ownedBy: getToken())
+        XCTAssertNil(fetched)
+        
+        let newListingData = try createListing(owner: user)
+        await assertThrowsAsyncError(try await repository.update(id: listing.id!, with: newListingData, ownedBy: getToken())) { error in
+            XCTAssertEqual(error.localizedDescription, "Abort.404: Unable to find any matching Listings.")
+        }
+        
+        fetched = try await repository.find(id: listing.id!, ownedBy: getToken())
+        XCTAssertNil(fetched)
     }
 }
