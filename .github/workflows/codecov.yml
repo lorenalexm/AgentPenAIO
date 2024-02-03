@@ -1,0 +1,24 @@
+name: Code Coverage
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  code-coverage-report:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+    - uses: swift-actions/setup-swift@v1
+      with:
+        swift-version: "5.9"
+    - name: Run Tests and Upload to Codecov
+      run: |
+        swift test --enable-code-coverage
+        llvm-cov export -format="lcov" .build/debug/StrapiSwiftCrossPackageTests.xctest -instr-profile .build/debug/codecov/default.profdata > info.lcov
+        bash <(curl https://codecov.io/bash)
+      shell: bash
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}  
