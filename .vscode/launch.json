@@ -1,0 +1,28 @@
+{
+	"configurations": [
+		{
+			"type": "lldb",
+			"request": "launch",
+			"sourceLanguages": [
+				"swift"
+			],
+			"args": [],
+			"cwd": "${workspaceFolder:AgentPenAIO}",
+			"name": "Debug Run",
+			"program": "${workspaceFolder:AgentPenAIO}/.build/debug/Run",
+			"preLaunchTask": "swift: Build Debug Run"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"sourceLanguages": [
+				"swift"
+			],
+			"args": [],
+			"cwd": "${workspaceFolder:AgentPenAIO}",
+			"name": "Release Run",
+			"program": "${workspaceFolder:AgentPenAIO}/.build/release/Run",
+			"preLaunchTask": "swift: Build Release Run"
+		}
+	]
+}
