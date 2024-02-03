@@ -19,14 +19,14 @@ struct UserController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let api = routes.grouped("api")
         let grouped = api.grouped("user")
-        grouped.get(use: getUser)
+        grouped.get(use: get)
         grouped.get("verify", use: verifyOrCreate)
     }
     
     /// Returns a `User` based on their Firebase user Id.
     /// - Parameter req: Information about the request that was received.
     /// - Returns: A matching `User` object.
-    func getUser(req: Request) async throws -> User {
+    func get(req: Request) async throws -> User {
         let token = try await req.verifyToken()
         if let user = try await app.repositories.users.findWithChildren(firebaseId: token.userID) {
             return user
