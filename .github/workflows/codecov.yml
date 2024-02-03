@@ -21,4 +21,12 @@ jobs:
         bash <(curl https://codecov.io/bash)
       shell: bash
       env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}  
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+        FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+        FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+        FIREBASE_MESSAGE_SENDER_ID: ${{ secrets.FIREBASE_MESSAGE_SENDER_ID }}
+        FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+        FIREBASE_USER_EMAIL: ${{ secrets.FIREBASE_USER_EMAIL }}
+        FIREBASE_USER_PASSWORD: ${{ secrets.FIREBASE_USER_PASSWORD }}
