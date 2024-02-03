@@ -19,7 +19,6 @@ struct ListingController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let api = routes.grouped("api")
         let grouped = api.grouped("listing")
-        grouped.post(use: create)
         grouped.get(":id", use: get)
         grouped.get(use: all)
     }
