@@ -12,4 +12,5 @@ import Vapor
 func routes(_ app: Application) throws {
     try app.register(collection: StaticPagesController())
     try app.register(collection: UserController(app: app))
+    try app.register(collection: ListingController(app: app))
 }

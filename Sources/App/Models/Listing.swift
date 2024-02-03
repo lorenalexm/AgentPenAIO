@@ -120,3 +120,5 @@ final class Listing: Model {
         self.revisions = revisions
     }
 }
+
+extension Listing: Content {}
